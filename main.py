@@ -49,13 +49,13 @@ def fill(board: np.array, options: list):
 def successor(state: np.array):
     board = state.copy()
     used = np.unique(board)[1:]
-    print(used)
+    # print(used)
     board[board == random.choice(used)] = 0
-    print(board)
+    # print(board)
     used = np.unique(board)[1:]
-    print(used)
+    # print(used)
     options = np.array(pieces)[~np.isin(np.arange(1, 11), used)]
-    print(options)
+    # print(options)
     board = fill(board, options.tolist())
     return board
 
@@ -65,7 +65,17 @@ def heuristic(state):
 
 
 def hill_climbing():
-    pass
+    current = generate()
+    value = heuristic(current)
+    for _ in range(1000):
+        neighbor = successor(current)
+        neighbor_value = heuristic(neighbor)
+        if neighbor_value == 0:
+            return neighbor, neighbor_value
+        if neighbor_value < value:
+            current = neighbor
+            value = neighbor_value
+    return current, value
 
 
 def main():
@@ -79,4 +89,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # main()
+    print(hill_climbing())
