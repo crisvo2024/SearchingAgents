@@ -1,5 +1,8 @@
 import numpy as np
 import random
+from numpy.random import default_rng
+
+rng = default_rng()
 
 pieces = [
     [8, 3],
@@ -57,6 +60,7 @@ def successor(state: np.array):
     options = np.array(pieces)[~np.isin(np.arange(1, 11), used)]
     # print(options)
     board = fill(board, options.tolist())
+    # print(board)
     return board
 
 
@@ -66,13 +70,55 @@ def heuristic(state):
 
 def hill_climbing():
     current = generate()
+    print(current)
     value = heuristic(current)
     for _ in range(1000):
         neighbor = successor(current)
         neighbor_value = heuristic(neighbor)
         if neighbor_value == 0:
             return neighbor, neighbor_value
-        if neighbor_value < value:
+        if neighbor_value < value :
+            current = neighbor
+            value = neighbor_value
+    return current, value
+# def simulated_annealing():
+#     initial_temp = 10000
+#     alpha = -1
+#     current = generate()
+#     print(current)
+#     value = heuristic(current)
+#     best = current
+#     best_value = value
+#     for T in range(initial_temp, 1, alpha):
+#         neighbor = successor(current)
+#         neighbor_value = heuristic(neighbor)
+#
+#         if neighbor_value == 0:
+#             return neighbor, neighbor_value
+#
+#         if neighbor_value < value or random.uniform(0, 1) < np.exp(value-neighbor_value / T):
+#             if neighbor_value < value and neighbor_value < best_value:
+#                 best = neighbor
+#                 best_value = neighbor_value
+#             current = neighbor
+#             value = neighbor_value
+#     return best, best_value
+
+def simulated_annealing():
+    initial_temp = 100000
+    alpha = -1
+    current = generate()
+    print(current)
+    value = heuristic(current)
+    for T10 in range(initial_temp, 1, alpha):
+        T = T10/1000
+        neighbor = successor(current)
+        neighbor_value = heuristic(neighbor)
+
+        if neighbor_value == 0:
+            return neighbor, neighbor_value
+
+        if neighbor_value < value or random.uniform(0, 1) < np.exp(value-neighbor_value / T):
             current = neighbor
             value = neighbor_value
     return current, value
@@ -91,3 +137,4 @@ def main():
 if __name__ == '__main__':
     # main()
     print(hill_climbing())
+    print(simulated_annealing())
