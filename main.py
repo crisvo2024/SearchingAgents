@@ -1,6 +1,7 @@
 import numpy as np
 import pprint
 import random
+from operator import itemgetter
 from numpy.random import default_rng
 
 pp = pprint.PrettyPrinter(indent=4)
@@ -14,7 +15,7 @@ pieces = [
     [9, 4],
     [6, 2],
     [4, 3],
-    [5, 7],
+    [7, 5],
     [3, 2],
     [4, 2]
 ]
@@ -110,6 +111,7 @@ def hill_climbing():
             current = neighbor
             value = neighbor_value
     return current, value
+
 # def simulated_annealing():
 #     initial_temp = 10000
 #     alpha = -1
