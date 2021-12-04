@@ -1,7 +1,9 @@
 import numpy as np
+import pprint
 import random
 from numpy.random import default_rng
 
+pp = pprint.PrettyPrinter(indent=4)
 rng = default_rng()
 
 pieces = [
