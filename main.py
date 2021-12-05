@@ -172,7 +172,7 @@ def generate_boards(n: int):
         while not valid:
             meta = original.copy()
             is_in = rng.choice(a=[False, True], size=N, p=[p, 1-p])
-            for _ in range(10):
+            for _ in range(20):
                 board = np.zeros((10, 10))
                 pieces_to_use = np.array(pieces)[is_in]
                 board, used_pieces = evolutive_fill(board, pieces_to_use.tolist())
@@ -200,11 +200,33 @@ def fit(state: np.array):
 
 
 def merge(a, b):
+    valid = []
+    while len(valid) < 2:
+        partition = random.randrange(0, 11)
+        first_half_a = a[:partition, :]
+        second_half_b = b[partition:, :]
+        child = np.concatenate((first_half_a, second_half_b), axis=0)
+        if random.randrange(2) == 1:
+            p = 0.2
+            rng.choice(a=[False, True], size=10, p=[p, 1-p])
+            selected = rng.choice(np.arange(0, 10))
+            child[selected, 0] = not child[selected, 0]
+        used = np.array(pieces)[child[:, 0].astype(bool)]
+        for i in range(20):
+            board = np.zeros((10, 10))
+            board, _ = evolutive_fill(board, used.tolist())
+            used_pieces = np.unique(board).astype(np.intc)[1:]
+            if np.array_equal(np.arange(1, 11)[child[:, 0].astype(bool)],used_pieces):
+                valid.append(child)
+                c = a
+                a = b
+                b = c
+                break
+    return valid
 
-    firstHalfA = a[:5, :]
-    secondHalfB = b[5:, :]
-    son1 = np.concatenate((firstHalfA, secondHalfB), axis=0)
-    return
+
+
+
 
 
 
@@ -213,28 +235,52 @@ def evolutive():
     population = generate_boards(100)
 #    for j in range(5):
       #  print(j)
-    fits = [[i, fit(population[i])] for i in range(100)]
+    for _ in range(30):
+        fits = [[i, fit(population[i])] for i in range(len(population))]
+        fits = sorted(fits, key=itemgetter(1))
+        print(fits)
+        new = []
+        for i in range(len(population)):
+            new.append(population[fits[i][0]])
+
+        population = np.array(new[0:100])
+
+        for i in range(20):
+            population[-i] = population[i]
+        # print(population)
+        top50 = population[:50]
+        bottom50 = population[50:]
+
+        newPopulation=[]
+
+        for i in range(25):
+            newPopulation.extend(merge(top50[-i].copy(), top50[i].copy()))
+            newPopulation.extend(merge(bottom50[-i].copy(), bottom50[i].copy()))
+        newPopulation = np.array(newPopulation)
+        population = np.concatenate((newPopulation, top50[:20]), axis=0)
+
+
+    fits = [[i, fit(population[i])] for i in range(len(population))]
     fits = sorted(fits, key=itemgetter(1))
     print(fits)
     new = []
     for i in range(len(population)):
         new.append(population[fits[i][0]])
+    population = np.array(new[0:100])
 
-    population = new[0:100]
+    for i in population[:20]:
 
-    for i in range(20):
-        population[-i] = population[i]
-    print(population)
-    top50 = population[:50]
-    bottom50 = population[50:]
+        used = np.array(pieces)[i[:, 0].astype(bool)]
+        while True:
+            board = np.zeros((10, 10))
+            board, _ = evolutive_fill(board, used.tolist())
+            used_pieces = np.unique(board).astype(np.intc)[1:]
+            if np.array_equal(np.arange(1, 11)[i[:, 0].astype(bool)],used_pieces):
+                print(board)
+                break
 
-    newPopulation=[]
 
-    for i in range(25):
-        newPopulation.append(merge(top50[-i], top50[i]))
-        newPopulation.append(merge(bottom50[-i], bottom50[i]))
-    newPopulation.append(top50[:20])
-    population = newPopulation
+
 
     #fits = [[i, fit(population[i])] for i in range(100)]
     #fits = sorted(fits, key=itemgetter(1))
